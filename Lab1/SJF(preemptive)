@@ -1,0 +1,66 @@
+#include <stdio.h>
+#include <limits.h>
+
+int main() {
+    int n, i, time = 0, completed = 0, min_bt, pos;
+    int at[20], bt[20], rt[20], ct[20], wt[20], tat[20], start[20];
+    float avg_wt = 0, avg_tat = 0, avg_rt = 0;
+
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    for(i = 0; i < n; i++) {
+        printf("Enter Arrival Time and Burst Time for Process %d: ", i+1);
+        scanf("%d %d", &at[i], &bt[i]);
+        rt[i] = bt[i];     // remaining time
+        start[i] = -1;     // to track first start
+    }
+
+    while(completed < n) {
+        min_bt = INT_MAX;
+        pos = -1;
+
+        for(i = 0; i < n; i++) {
+            if(at[i] <= time && rt[i] > 0 && rt[i] < min_bt) {
+                min_bt = rt[i];
+                pos = i;
+            }
+        }
+
+        if(pos == -1) {
+            time++;
+            continue;
+        }
+
+        if(start[pos] == -1)
+            start[pos] = time;   // first response time
+
+        rt[pos]--;
+        time++;
+
+        if(rt[pos] == 0) {
+            completed++;
+            ct[pos] = time;
+            tat[pos] = ct[pos] - at[pos];
+            wt[pos] = tat[pos] - bt[pos];
+        }
+    }
+
+    printf("\nP\tAT\tBT\tCT\tWT\tTAT\tRT\n");
+
+    for(i = 0; i < n; i++) {
+        int response = start[i] - at[i];
+        avg_wt += wt[i];
+        avg_tat += tat[i];
+        avg_rt += response;
+
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+               i+1, at[i], bt[i], ct[i], wt[i], tat[i], response);
+    }
+
+    printf("\nAverage Waiting Time = %.2f", avg_wt/n);
+    printf("\nAverage Turnaround Time = %.2f", avg_tat/n);
+    printf("\nAverage Response Time = %.2f\n", avg_rt/n);
+
+    return 0;
+}
