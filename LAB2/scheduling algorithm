@@ -1,0 +1,91 @@
+#include <stdio.h>
+
+struct Process {
+    int at, bt, pr, rt, ct, tat, wt, done;
+} p[20];
+
+int main() {
+    int n, i, time = 0, completed = 0, choice;
+
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    // Input processes clearly
+    for (i = 0; i < n; i++) {
+        printf("\nProcess %d\n", i + 1);
+        printf("Arrival Time: ");
+        scanf("%d", &p[i].at);
+        printf("Burst Time: ");
+        scanf("%d", &p[i].bt);
+        printf("Priority (smaller number = higher priority): ");
+        scanf("%d", &p[i].pr);
+
+        p[i].rt = p[i].bt;
+        p[i].done = 0;
+    }
+
+    printf("\nChoose Scheduling Type:\n");
+    printf("1. Preemptive Priority\n");
+    printf("2. Non-Preemptive Priority\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+
+    while (completed < n) {
+        int idx = -1, hp = 999;
+
+        // Find the highest priority process that has arrived
+        for (i = 0; i < n; i++) {
+            if (p[i].at <= time && !p[i].done) {
+                if (p[i].pr < hp) {
+                    hp = p[i].pr;
+                    idx = i;
+                }
+            }
+        }
+
+        if (idx == -1) {
+            time++;
+            continue;
+        }
+
+        if (choice == 1) {  // Preemptive
+            p[idx].rt--;
+            time++;
+
+            if (p[idx].rt == 0) {
+                p[idx].done = 1;
+                completed++;
+                p[idx].ct = time;
+                p[idx].tat = p[idx].ct - p[idx].at;
+                p[idx].wt = p[idx].tat - p[idx].bt;
+            }
+        } else {  // Non-Preemptive
+            time += p[idx].bt;
+            p[idx].done = 1;
+            completed++;
+            p[idx].ct = time;
+            p[idx].tat = p[idx].ct - p[idx].at;
+            p[idx].wt = p[idx].tat - p[idx].bt;
+        }
+    }
+
+    float awt = 0, atat = 0;
+
+    // Print table header
+    printf("\n%-5s %-5s %-5s %-8s %-5s %-5s %-5s\n",
+           "PID", "AT", "BT", "PR", "CT", "TAT", "WT");
+
+    for (i = 0; i < n; i++) {
+        printf("%-5d %-5d %-5d %-8d %-5d %-5d %-5d\n",
+               i + 1, p[i].at, p[i].bt, p[i].pr,
+               p[i].ct, p[i].tat, p[i].wt);
+
+        awt += p[i].wt;
+        atat += p[i].tat;
+    }
+
+    printf("\nAverage Waiting Time = %.2f", awt / n);
+    printf("\nAverage Turnaround Time = %.2f\n", atat / n);
+
+    return 0;
+}
