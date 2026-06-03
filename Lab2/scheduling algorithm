@@ -1,91 +1,65 @@
 #include <stdio.h>
 
-struct Process {
-    int at, bt, pr, rt, ct, tat, wt, done;
-} p[20];
-
 int main() {
-    int n, i, time = 0, completed = 0, choice;
+    int n, i, j;
+    int at[20], bt[20], pr[20], ct[20], wt[20], tat[20];
+    float avg_wt = 0, avg_tat = 0;
 
     printf("Enter number of processes: ");
     scanf("%d", &n);
 
-    // Input processes clearly
-    for (i = 0; i < n; i++) {
-        printf("\nProcess %d\n", i + 1);
-        printf("Arrival Time: ");
-        scanf("%d", &p[i].at);
-        printf("Burst Time: ");
-        scanf("%d", &p[i].bt);
-        printf("Priority (smaller number = higher priority): ");
-        scanf("%d", &p[i].pr);
-
-        p[i].rt = p[i].bt;
-        p[i].done = 0;
+    for(i = 0; i < n; i++) {
+        printf("Enter AT, BT and Priority for P%d: ", i + 1);
+        scanf("%d%d%d", &at[i], &bt[i], &pr[i]);
     }
 
-    printf("\nChoose Scheduling Type:\n");
-    printf("1. Preemptive Priority\n");
-    printf("2. Non-Preemptive Priority\n");
-    printf("Enter choice: ");
-    scanf("%d", &choice);
+    // Sort by Priority (smaller number = higher priority)
+    for(i = 0; i < n - 1; i++) {
+        for(j = i + 1; j < n; j++) {
+            if(pr[i] > pr[j]) {
+                int temp;
 
-    while (completed < n) {
-        int idx = -1, hp = 999;
-
-        // Find the highest priority process that has arrived
-        for (i = 0; i < n; i++) {
-            if (p[i].at <= time && !p[i].done) {
-                if (p[i].pr < hp) {
-                    hp = p[i].pr;
-                    idx = i;
-                }
+                temp = pr[i]; 
+                pr[i] = pr[j]; 
+                pr[j] = temp;
+                temp = at[i]; 
+                at[i] = at[j]; 
+                at[j] = temp;
+                temp = bt[i]; 
+                bt[i] = bt[j]; 
+                bt[j] = temp;
             }
         }
-
-        if (idx == -1) {
-            time++;
-            continue;
-        }
-
-        if (choice == 1) {  // Preemptive
-            p[idx].rt--;
-            time++;
-
-            if (p[idx].rt == 0) {
-                p[idx].done = 1;
-                completed++;
-                p[idx].ct = time;
-                p[idx].tat = p[idx].ct - p[idx].at;
-                p[idx].wt = p[idx].tat - p[idx].bt;
-            }
-        } else {  // Non-Preemptive
-            time += p[idx].bt;
-            p[idx].done = 1;
-            completed++;
-            p[idx].ct = time;
-            p[idx].tat = p[idx].ct - p[idx].at;
-            p[idx].wt = p[idx].tat - p[idx].bt;
-        }
     }
 
-    float awt = 0, atat = 0;
+    ct[0] = at[0] + bt[0];
 
-    // Print table header
-    printf("\n%-5s %-5s %-5s %-8s %-5s %-5s %-5s\n",
-           "PID", "AT", "BT", "PR", "CT", "TAT", "WT");
-
-    for (i = 0; i < n; i++) {
-        printf("%-5d %-5d %-5d %-8d %-5d %-5d %-5d\n",
-               i + 1, p[i].at, p[i].bt, p[i].pr,
-               p[i].ct, p[i].tat, p[i].wt);
-
-        awt += p[i].wt;
-        atat += p[i].tat;
+    for(i = 1; i < n; i++) {
+        if(ct[i-1] < at[i])
+            ct[i] = at[i] + bt[i];
+        else
+            ct[i] = ct[i-1] + bt[i];
     }
 
-    printf("\nAverage Waiting Time = %.2f", awt / n);
-    printf("\nAverage Turnaround Time = %.2f\n", atat / n);
+    for(i = 0; i < n; i++) {
+        tat[i] = ct[i] - at[i];
+        wt[i] = tat[i] - bt[i];
+
+        avg_wt += wt[i];
+        avg_tat += tat[i];
+    }
+
+    printf("\nP\tAT\tBT\tPR\tCT\tWT\tTAT\n");
+
+    for(i = 0; i < n; i++) {
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+               i+1, at[i], bt[i], pr[i],
+               ct[i], wt[i], tat[i]);
+    }
+
+    printf("\nAverage Waiting Time = %.2f", avg_wt/n);
+    printf("\nAverage Turnaround Time = %.2f", avg_tat/n);
 
     return 0;
 }
+
