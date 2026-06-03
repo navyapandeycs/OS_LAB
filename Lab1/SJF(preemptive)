@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <limits.h>
 
 int main() {
     int n, i, time = 0, completed = 0, min_bt, pos;
@@ -17,7 +16,7 @@ int main() {
     }
 
     while(completed < n) {
-        min_bt = INT_MAX;
+        min_bt = 9999;
         pos = -1;
 
         for(i = 0; i < n; i++) {
@@ -29,20 +28,20 @@ int main() {
 
         if(pos == -1) {
             time++;
-            continue;
-        }
+        }else{
 
-        if(start[pos] == -1)
-            start[pos] = time;   // first response time
-
-        rt[pos]--;
-        time++;
-
-        if(rt[pos] == 0) {
-            completed++;
-            ct[pos] = time;
-            tat[pos] = ct[pos] - at[pos];
-            wt[pos] = tat[pos] - bt[pos];
+            if(start[pos] == -1)
+                start[pos] = time;   // first response time
+    
+            rt[pos]--;
+            time++;
+    
+            if(rt[pos] == 0) {
+                completed++;
+                ct[pos] = time;
+                tat[pos] = ct[pos] - at[pos];
+                wt[pos] = tat[pos] - bt[pos];
+            }
         }
     }
 
